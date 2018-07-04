@@ -1,0 +1,90 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jun 10 22:28:55 2018
+
+@author: 佛山
+"""
+
+
+import urllib.request
+import os
+import requests
+from bs4 import BeautifulSoup
+
+
+url_1 = "https://www.9956h.com/Html/60/index-"
+url_2 = ".html"
+url_bag_1 = []
+for i in range(0,20):
+    url = url_1 + str(i) + url_2
+    r = requests.get(url)
+    r.encoding='urf-8'
+    soup = BeautifulSoup(r.text, 'html.parser')
+    target = soup.find('div', {"class":"box movie_list"})
+    target = target.find_all("a")
+    for a in target:
+        new_url = str("https://www.9956h.com") + str(a["href"])
+        url_bag_1.append(new_url)
+
+url_bag_2 = []
+for i in url_bag_1:
+    try:
+        r = requests.get(i)
+        r.encoding ='utf-8'
+        soup = BeautifulSoup(r.text, 'html.parser')
+        target_1 = soup.find("ul", {"class":"downurl"}).find("a")['href']
+        target_2 = soup.find("span", {"class":"cat_pos_l"}).text[22:]
+        target = []
+        target.append(target_1)
+        target.append(target_2)
+        url_bag_2.append(target)
+    except:
+        print("not target url!")
+
+
+
+
+def Schedule(a,b,c):
+     '''''
+     a:已经下载的数据块
+     b:数据块的大小
+     c:远程文件的大小
+    '''
+     per = 100.0 * a * b / c
+     if per > 100 :
+         per = 100
+     print('%.2f%%' % per)
+
+def save_img(img_url, file_name, file_path='img3\\'):
+     # 保存图片到磁盘文件夹 file_path中，默认为当前脚本运行目录下的 book\img文件夹
+     try:
+         if not os.path.exists(file_path):
+             print('文件夹', file_path, '不存在，重新建立')
+             # os.mkdir(file_path)
+             os.makedirs(file_path)
+         # 获得图片后缀
+         file_suffix = os.path.splitext(img_url)[1]
+         # print(os.path.splitext(img_url))
+         # 拼接图片名（包含路径）
+         filename = '{}{}{}{}'.format(file_path, os.sep, file_name, file_suffix)
+         print(filename)
+         # print(filename)
+         # 下载图片，并保存到文件夹中
+         urllib.request.urlretrieve(img_url, filename=filename)
+     except IOError as e:
+         print('错误:', e)
+     except Exception as e:
+         print('错误 ：', e)
+         
+
+for i in url_bag_2:
+    print(i[0])
+#local = os.path.join()
+    save_img(i[0], i[1])
+    print("done!")
+
+
+"""
+https://www.b.30cdn.com/video-hls/89/2018/06/wrGseUpD/hls/wrGseUpD0.ts
+https://www.b.30cdn.com/video-hls/89/2018/06/wrGseUpD/hls/wrGseUpD4.ts
+"""
